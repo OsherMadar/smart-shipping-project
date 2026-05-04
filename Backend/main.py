@@ -1,7 +1,7 @@
 # Backend/main.py
 # FastAPI app with CORS, DB health endpoints, routers, and APScheduler via Lifespan.
 
-from __future__ import annotations
+from fastapi.middleware.cors import CORSMiddleware
 
 import logging, sys, os
 from logging.handlers import RotatingFileHandler
@@ -194,6 +194,8 @@ app.include_router(assignments_router)
 app.include_router(matching_router)
 app.include_router(poba_router)
 app.include_router(escrow_router)
+
+
 
 
 #install_poba_slot_listener(app)

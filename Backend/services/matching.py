@@ -1,6 +1,7 @@
 # services/matching.py
 # Matching logic with proper row-level locking and UTC timestamps.
 from __future__ import annotations
+from ..trust_score import calculate_trust_score
 
 from datetime import datetime, timezone
 from typing import Optional
@@ -97,12 +98,12 @@ def match_for_offer(session: Session, *, offer_id: str) -> Optional[Assignment]:
 
         chosen: Optional[Request] = None
         for r in candidates:
-            if _request_matches_offer(r, offer):
-                chosen = r
-                break
+          if _request_matches_offer(r, offer):
+            chosen = r
+            break
 
         if not chosen:
-            return None
+             return None
 
         asn = Assignment(
             request_id=chosen.id,
@@ -149,11 +150,16 @@ def match_for_request(session: Session, *, request_id: str) -> Optional[Assignme
             .all()
         )
 
-        chosen: Optional[CourierOffer] = None
-        for off in offers:
-            if _request_matches_offer(req, off):
-                chosen = off
-                break
+        valid_offers = [off for off in offers if _request_matches_offer(req, off)]
+
+        valid_offers.sort(
+            key=lambda off: calculate_trust_score(
+                {"rating": off.driver.rating if off.driver else None}
+        ),
+         reverse=True,
+        )
+
+        chosen = valid_offers[0] if valid_offers else None
 
         if not chosen:
             return None

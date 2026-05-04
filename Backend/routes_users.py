@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from .Database.db import get_db
 from .auth_dep import get_current_user  # extracts user (incl. wallet_address) from JWT
+from .trust_score import calculate_trust_score
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -18,7 +19,9 @@ def get_me(me = Depends(get_current_user)):
     Return the current user as resolved from the JWT (via get_current_user).
     The returned dict mirrors columns in the 'users' table.
     """
-    return me
+    user = dict(me)
+    user["trust_score"] = calculate_trust_score(user)
+    return user
 
 
 @router.put("/me")
