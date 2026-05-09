@@ -3,14 +3,11 @@ def calculate_trust_score(user: dict) -> float:
     predicted_time = user.get("predicted_delivery_time")
     actual_time = user.get("actual_delivery_time")
 
-    # User rating part
     try:
         rating_score = float(rating) if rating is not None else 3.0
     except (TypeError, ValueError):
         rating_score = 3.0
 
-    # ML performance part
-    # If we do not have prediction + actual time yet, use neutral score
     performance_score = 3.0
 
     if predicted_time is not None and actual_time is not None:
@@ -34,8 +31,6 @@ def calculate_trust_score(user: dict) -> float:
         except (TypeError, ValueError):
             performance_score = 3.0
 
-    # Final weighted trust score
-    # 70% user rating, 30% ML-based performance
     trust_score = (0.7 * rating_score) + (0.3 * performance_score)
 
     return round(min(max(trust_score, 1.0), 5.0), 2)

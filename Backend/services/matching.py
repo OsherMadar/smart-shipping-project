@@ -17,6 +17,8 @@ try:
 except Exception:  # pragma: no cover
     from ..models import Offer as CourierOffer  # type: ignore
 
+from ..ml_predictor import predict_delivery_time
+
 # ---- Status constants aligned with your enums ----
 REQ_OPEN = "open"
 REQ_ASSIGNED = "assigned"
@@ -150,13 +152,25 @@ def match_for_request(session: Session, *, request_id: str) -> Optional[Assignme
             .all()
         )
 
-        valid_offers = [off for off in offers if _request_matches_offer(req, off)]
-
         valid_offers.sort(
-            key=lambda off: calculate_trust_score(
-                {"rating": off.driver.rating if off.driver else None}
-        ),
-         reverse=True,
+            key=lambda off: (
+                0.7 * float(off.driver.rating if off.driver and off.driver.rating is not None else 3.0)
+                -
+                0.3 * predict_delivery_time([
+                    25,
+                    float(off.driver.rating) if off.driver and off.driver.rating else 3.0,
+                    "Clear",
+                    "Low",
+                    "Bike",
+                    str(req.type),
+                    1,
+                    "No",
+                    "City",
+                    5,
+                    req.window_start.strftime("%A") if req.window_start else "Monday",
+                ])
+            ),
+            reverse=True,
         )
 
         chosen = valid_offers[0] if valid_offers else None
