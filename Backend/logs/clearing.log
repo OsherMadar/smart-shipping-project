@@ -5567,3 +5567,13 @@ sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate
 2026-05-05 11:48:28,530 INFO clearing Auto-matcher disabled (BID_AUTO_MATCHER != 1) — scheduler not started
 2026-05-05 11:49:17,442 INFO clearing Auto-matcher disabled (BID_AUTO_MATCHER != 1) — scheduler not started
 2026-05-05 12:18:46,388 INFO clearing Auto-matcher disabled (BID_AUTO_MATCHER != 1) — scheduler not started
+2026-05-10 02:46:58,327 INFO clearing Auto-matcher disabled (BID_AUTO_MATCHER != 1) — scheduler not started
+2026-05-10 03:07:17,772 INFO clearing Auto-matcher disabled (BID_AUTO_MATCHER != 1) — scheduler not started
+2026-05-10 03:14:32,037 INFO clearing Auto-matcher disabled (BID_AUTO_MATCHER != 1) — scheduler not started
+2026-05-10 03:16:59,528 INFO clearing Auto-matcher disabled (BID_AUTO_MATCHER != 1) — scheduler not started
+2026-05-10 03:17:29,042 INFO clearing Auto-matcher disabled (BID_AUTO_MATCHER != 1) — scheduler not started
+2026-05-10 03:25:33,304 INFO clearing Auto-matcher disabled (BID_AUTO_MATCHER != 1) — scheduler not started
+2026-05-10 12:31:16,196 INFO clearing Auto-matcher disabled (BID_AUTO_MATCHER != 1) — scheduler not started
+2026-05-10 12:31:44,266 INFO clearing Auto-matcher disabled (BID_AUTO_MATCHER != 1) — scheduler not started
+2026-05-10 13:49:22,810 INFO clearing Auto-matcher disabled (BID_AUTO_MATCHER != 1) — scheduler not started
+2026-05-10 13:51:25,017 INFO clearing Auto-matcher disabled (BID_AUTO_MATCHER != 1) — scheduler not started

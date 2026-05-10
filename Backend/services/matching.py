@@ -29,6 +29,11 @@ OFFER_ASSIGNED = "assigned"
 ASSN_CREATED = "created"
 ACTIVE_ASSIGNMENT_STATUSES = {"created", "picked_up", "in_transit"}
 
+def _price_to_cents(value):
+    if value is None:
+        return 0
+    return int(float(value) * 100)
+
 
 # --------- Time window helper ----------
 def _time_overlaps(a_start, a_end, b_start, b_end) -> bool:
@@ -111,8 +116,9 @@ def match_for_offer(session: Session, *, offer_id: str) -> Optional[Assignment]:
             request_id=chosen.id,
             driver_user_id=offer.driver_user_id,
             offer_id=getattr(offer, "id", None),
+            agreed_price_cents=_price_to_cents(getattr(offer, "min_price", None)),
             status=ASSN_CREATED,
-            assigned_at=datetime.now(timezone.utc),  # tz-aware!
+            assigned_at=datetime.now(timezone.utc),
         )
         session.add(asn)
 
@@ -121,7 +127,8 @@ def match_for_offer(session: Session, *, offer_id: str) -> Optional[Assignment]:
 
         try:
             session.flush()  # let DB constraints protect us
-        except IntegrityError:
+        except IntegrityError as e:
+            print("MATCHING DB ERROR:", e)
             session.rollback()
             return None
 
@@ -152,6 +159,9 @@ def match_for_request(session: Session, *, request_id: str) -> Optional[Assignme
             .all()
         )
 
+        valid_offers = [off for off in offers if _request_matches_offer(req, off)]
+
+    
         valid_offers.sort(
             key=lambda off: (
                 0.7 * float(off.driver.rating if off.driver and off.driver.rating is not None else 3.0)
@@ -161,6 +171,7 @@ def match_for_request(session: Session, *, request_id: str) -> Optional[Assignme
                     float(off.driver.rating) if off.driver and off.driver.rating else 3.0,
                     "Clear",
                     "Low",
+                    1,
                     "Bike",
                     str(req.type),
                     1,
@@ -182,8 +193,9 @@ def match_for_request(session: Session, *, request_id: str) -> Optional[Assignme
             request_id=req.id,
             driver_user_id=chosen.driver_user_id,
             offer_id=getattr(chosen, "id", None),
+            agreed_price_cents=_price_to_cents(getattr(chosen, "min_price", None)),
             status=ASSN_CREATED,
-            assigned_at=datetime.now(timezone.utc),  # tz-aware!
+            assigned_at=datetime.now(timezone.utc),
         )
         session.add(asn)
 
@@ -192,7 +204,8 @@ def match_for_request(session: Session, *, request_id: str) -> Optional[Assignme
 
         try:
             session.flush()
-        except IntegrityError:
+        except IntegrityError as e:
+            print("MATCHING DB ERROR:", e)
             session.rollback()
             return None
 
