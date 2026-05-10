@@ -233,11 +233,28 @@ export default function RequestDetailsScreen() {
 
     try {
       setSavingStatus(true);
-      const updated = await updateAssignmentStatus(
-        String(token),
-        String(aid),
-        newStatus
-      );
+      let updated;
+
+if (newStatus === "completed") {
+  const res = await fetch(
+    `http://127.0.0.1:8000/match/assignments/${aid}/complete`,
+    {
+      method: "POST",
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to complete assignment");
+  }
+
+  updated = await getAssignmentById(String(aid));
+} else {
+  updated = await updateAssignmentStatus(
+    String(token),
+    String(aid),
+    newStatus
+  );
+}
       setData(updated);
       setSheetVisible(false);
     } catch (e: any) {

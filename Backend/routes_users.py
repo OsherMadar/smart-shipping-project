@@ -267,3 +267,38 @@ def list_users(db: Session = Depends(get_db)):
     """)
     return [dict(r) for r in db.execute(q).mappings().all()]
 
+@router.post("/drivers/{driver_id}/rate")
+def rate_driver(
+    driver_id: str,
+    payload: dict,
+    db: Session = Depends(get_db),
+    me = Depends(get_current_user),
+):
+    score = payload.get("rating")
+
+    if score is None:
+        raise HTTPException(status_code=400, detail="Rating is required")
+
+    try:
+        score = int(score)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Rating must be a number")
+
+    if score < 1 or score > 5:
+        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+
+    row = db.execute(
+        text("""
+            UPDATE users
+            SET rating = :rating, updated_at = NOW()
+            WHERE id = :driver_id AND role = 'driver'
+            RETURNING id, first_name, last_name, role, rating
+        """),
+        {"rating": score, "driver_id": driver_id},
+    ).mappings().first()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Driver not found")
+
+    db.commit()
+    return dict(row)
